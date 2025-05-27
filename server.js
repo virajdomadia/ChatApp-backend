@@ -3,9 +3,10 @@ import dotenv from "dotenv";
 import cors from "cors";
 import http from "http";
 
-import connectDB from "./config/db";
-import initSocket from "./sockets/socket";
-import { connect } from "http2";
+import connectDB from "./config/db.js";
+import initSocket from "./sockets/socket.js";
+
+import auth from "./routes/authRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -19,6 +20,8 @@ connectDB();
 app.get("/", (req, res) => {
   res.send("ChatApp Backend is running");
 });
+
+app.use("/api/auth", auth);
 
 initSocket(server);
 
