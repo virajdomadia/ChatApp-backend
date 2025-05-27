@@ -7,6 +7,8 @@ import connectDB from "./config/db.js";
 import initSocket from "./sockets/socket.js";
 
 import auth from "./routes/authRoutes.js";
+import chat from "./routes/chatRoutes.js";
+import message from "./routes/messageRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -22,6 +24,8 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", auth);
+app.use("/api/chats", chat);
+app.use("/api/messages", message);
 
 initSocket(server);
 

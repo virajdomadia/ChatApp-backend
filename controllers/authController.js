@@ -42,4 +42,15 @@ const login = async (req, res) => {
   }
 };
 
-export { register, login };
+const profile = async (req, res) => {
+  const keyword = req.query.search
+    ? {
+        name: { $regex: req.query.search, $options: "i" },
+      }
+    : {};
+
+  const users = await User.find(keyword).find({ _id: { $ne: req.user._id } });
+  res.json(users);
+};
+
+export { register, login, profile };
