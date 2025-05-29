@@ -1,3 +1,4 @@
+// server/socket/initSocket.js
 import { Server } from "socket.io";
 
 const initSocket = (server) => {
@@ -10,14 +11,23 @@ const initSocket = (server) => {
 
   io.on("connection", (socket) => {
     console.log("Client Connected:", socket.id);
-    socket.on("message", (data) => {
-      console.log("Message received:", data);
-      socket.broadcast.emit("message", data);
+
+    socket.on("join", (roomId) => {
+      socket.join(roomId);
+      console.log(`User ${socket.id} joined room ${roomId}`);
     });
+
+    socket.on("sendMessage", (msg) => {
+      const { chatId } = msg;
+      console.log(`Broadcasting message to chatId ${chatId}:`, msg);
+      socket.to(chatId).emit("receiveMessage", msg);
+    });
+
     socket.on("disconnect", () => {
       console.log("Client Disconnected:", socket.id);
     });
   });
+
   return io;
 };
 
