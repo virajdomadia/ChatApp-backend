@@ -1,6 +1,8 @@
 // server/socket/initSocket.js
 import { Server } from "socket.io";
 
+const onlineUsers = new Map(); // userId => socket.id
+
 const initSocket = (server) => {
   const io = new Server(server, {
     cors: {
@@ -10,20 +12,27 @@ const initSocket = (server) => {
   });
 
   io.on("connection", (socket) => {
-    console.log("Client Connected:", socket.id);
+    console.log("Client connected:", socket.id);
 
-    socket.on("join", (roomId) => {
-      socket.join(roomId);
-      console.log(`User ${socket.id} joined room ${roomId}`);
+    // Join user room for online status
+    socket.on("joinUser", (userId) => {
+      onlineUsers.set(userId, socket.id);
+      io.emit("onlineUsers", Array.from(onlineUsers.keys()));
     });
 
+    // Join a chat room
+    socket.on("joinChat", (chatId) => {
+      socket.join(chatId);
+      console.log(`User ${socket.id} joined chat ${chatId}`);
+    });
+
+    // Send message
     socket.on("sendMessage", (msg) => {
       const { chatId } = msg;
-      console.log(`Broadcasting message to chatId ${chatId}:`, msg);
       socket.to(chatId).emit("receiveMessage", msg);
     });
 
-    // New: Typing indicator events
+    // Typing indicators
     socket.on("typing", ({ chatId, userId, userName }) => {
       socket.to(chatId).emit("typing", { userId, userName });
     });
@@ -32,8 +41,16 @@ const initSocket = (server) => {
       socket.to(chatId).emit("stopTyping", { userId });
     });
 
+    // Disconnect
     socket.on("disconnect", () => {
-      console.log("Client Disconnected:", socket.id);
+      for (const [userId, sid] of onlineUsers.entries()) {
+        if (sid === socket.id) {
+          onlineUsers.delete(userId);
+          break;
+        }
+      }
+      io.emit("onlineUsers", Array.from(onlineUsers.keys()));
+      console.log("Client disconnected:", socket.id);
     });
   });
 
