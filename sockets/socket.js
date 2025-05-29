@@ -23,6 +23,15 @@ const initSocket = (server) => {
       socket.to(chatId).emit("receiveMessage", msg);
     });
 
+    // New: Typing indicator events
+    socket.on("typing", ({ chatId, userId, userName }) => {
+      socket.to(chatId).emit("typing", { userId, userName });
+    });
+
+    socket.on("stopTyping", ({ chatId, userId }) => {
+      socket.to(chatId).emit("stopTyping", { userId });
+    });
+
     socket.on("disconnect", () => {
       console.log("Client Disconnected:", socket.id);
     });
