@@ -6,7 +6,7 @@ const onlineUsers = new Map(); // userId => socket.id
 const initSocket = (server) => {
   const io = new Server(server, {
     cors: {
-      origin: "https://realtime-chatapp-beta.vercel.app/login",
+      origin: "https://realtime-chatapp-viraj.vercel.app/",
       methods: ["GET", "POST"],
     },
   });
